@@ -1,22 +1,59 @@
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include <stdlib.h>
+#include "Perceptron.h"
+#include "Constants.h"
+
+using namespace sf;
+
+
+void generateCircles(std::vector<CircleShape> &circles)
+{
+	circles.clear();
+	for (int i = 0; i < CIRCLE_AMOUNT; i++)
+	{
+		CircleShape cs(CIRCLE_RADIUS);
+		if (rand() % 2 == 0)
+			cs.setFillColor(Color::Red);
+		else
+			cs.setFillColor(Color::Green);
+		cs.setPosition(rand() % (WINDOWS_WIDTH - CIRCLE_RADIUS), rand() % (WINDOWS_HEIGHT - CIRCLE_RADIUS));
+		circles.push_back(cs);
+	}
+}
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-	sf::CircleShape shape(100.f);
-	shape.setFillColor(sf::Color::Green);
+	srand(time(0));
+
+	std::vector<CircleShape> circles;
+
+	generateCircles(circles);
+	Perceptron::initializePerceptron();
+	ContextSettings settings;
+	settings.antialiasingLevel = 8;
+
+	RenderWindow window(VideoMode(WINDOWS_WIDTH, WINDOWS_HEIGHT), "Perceptron", Style::Default, settings);
 
 	while (window.isOpen())
 	{
-		sf::Event event;
+		window.clear(Color::White);
+
+		Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
+			if (event.type == sf::Event::KeyPressed)
+			if (event.key.code == sf::Keyboard::Space)
+				generateCircles(circles);
+			if (event.type == Event::Closed)
 				window.close();
 		}
 
-		window.clear();
-		window.draw(shape);
+		for (std::vector<CircleShape>::iterator it = circles.begin(); it != circles.end(); ++it)
+		{
+			window.draw(*it);
+		}
+
 		window.display();
 	}
 
